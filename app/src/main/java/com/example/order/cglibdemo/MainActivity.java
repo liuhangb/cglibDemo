@@ -7,6 +7,10 @@ import android.util.Log;
 
 import com.example.order.cglibdemo.test.Test;
 import com.example.order.cglibdemo.test.Test2;
+import com.mdit.library.proxy.CallbackFilter;
+import com.mdit.library.proxy.NoOp;
+
+import java.lang.reflect.Method;
 
 import leo.android.cglib.proxy.Enhancer;
 import leo.android.cglib.proxy.MethodInterceptor;
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         com.mdit.library.proxy.Enhancer enhancer = new com.mdit.library.proxy.Enhancer(this);
         enhancer.setSuperclass(Test2.class);
-        enhancer.setCallback(new com.mdit.library.proxy.MethodInterceptor() {
+        enhancer.setCallbacks(new com.mdit.library.proxy.MethodInterceptor[]{NoOp.INSTANCE, new com.mdit.library.proxy.MethodInterceptor() {
 
             @Override
             public Object intercept(Object object, Object[] args, com.mdit.library.proxy.MethodProxy methodProxy) throws Exception {
@@ -53,6 +57,15 @@ public class MainActivity extends AppCompatActivity {
                 Object o1 = methodProxy.invokeSuper(object, args);
                 Log.e(TAG,"intercept  -- after---");
                 return o1;
+            }
+        }});
+        enhancer.setCallbackFilter(new CallbackFilter() {
+            @Override
+            public int accept(Method method) {
+                if (method.getName().equals("test1"))
+                return 1;
+                else
+                    return 0;
             }
         });
         Test2 test2 = (Test2) enhancer.create();
